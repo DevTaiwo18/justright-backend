@@ -14,7 +14,7 @@ const createAdmin = async () => {
 
     // Create admin user
     const admin = await User.create({
-      username: 'justright-admin',
+      username: 'justright',
       password: 'justright123', 
       role: 'admin'
     });
