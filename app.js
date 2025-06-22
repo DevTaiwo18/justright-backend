@@ -8,6 +8,7 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: 'http://localhost:5173', // or your deployed frontend link
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 app.use(express.json());
