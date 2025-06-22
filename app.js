@@ -7,7 +7,7 @@ const app = express();
  
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://your-frontend-domain.com'], // Add all frontend domains
+  origin: ['http://localhost:5173', 'https://justright-frontend.vercel.app'], // Add all frontend domains
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
