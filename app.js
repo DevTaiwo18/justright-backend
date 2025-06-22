@@ -6,8 +6,6 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-const cors = require('cors');
-
 app.use(cors({
   origin: 'http://localhost:5173', // or your deployed frontend link
   credentials: true
