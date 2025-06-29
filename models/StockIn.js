@@ -11,14 +11,6 @@ const StockInSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
-  supplier: {
-    type: String,
-    trim: true
-  },
-  notes: {
-    type: String,
-    trim: true
-  },
   date: {
     type: Date,
     default: Date.now

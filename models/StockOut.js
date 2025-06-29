@@ -11,15 +11,6 @@ const StockOutSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
-  saleType: {
-    type: String,
-    enum: ['retail', 'wholesale'],
-    default: 'retail'
-  },
-  notes: {
-    type: String,
-    trim: true
-  },
   date: {
     type: Date,
     default: Date.now

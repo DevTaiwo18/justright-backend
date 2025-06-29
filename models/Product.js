@@ -11,11 +11,6 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  packSize: {
-    type: String,
-    required: true,
-    trim: true
-  },
   buyingPrice: {
     type: Number,
     required: true,
@@ -26,21 +21,14 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
-  supplier: {
-    type: String,
-    trim: true
-  },
-  expiryDate: {
-    type: Date
+  currentStock: {
+    type: Number,
+    default: 0,
+    min: 0
   },
   lowStockThreshold: {
     type: Number,
     default: 5,
-    min: 0
-  },
-  currentStock: {
-    type: Number,
-    default: 0,
     min: 0
   }
 }, {

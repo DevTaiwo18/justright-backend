@@ -6,23 +6,15 @@ const { validationResult } = require('express-validator');
 // Stock In Controllers
 const getStockIns = async (req, res) => {
   try {
-    const { page = 1, limit = 50, startDate, endDate } = req.query;
-    
-    let query = {};
-    
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
-    }
+    const { page = 1, limit = 50 } = req.query;
 
-    const stockIns = await StockIn.find(query)
-      .populate('product', 'name category packSize')
+    const stockIns = await StockIn.find()
+      .populate('product', 'name category')
       .sort({ date: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    const total = await StockIn.countDocuments(query);
+    const total = await StockIn.countDocuments();
 
     res.json({
       success: true,
@@ -73,7 +65,7 @@ const createStockIn = async (req, res) => {
     await product.save();
 
     const populatedStockIn = await StockIn.findById(stockIn._id)
-      .populate('product', 'name category packSize');
+      .populate('product', 'name category');
 
     res.status(201).json({
       success: true,
@@ -92,23 +84,15 @@ const createStockIn = async (req, res) => {
 // Stock Out Controllers
 const getStockOuts = async (req, res) => {
   try {
-    const { page = 1, limit = 50, startDate, endDate } = req.query;
-    
-    let query = {};
-    
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
-    }
+    const { page = 1, limit = 50 } = req.query;
 
-    const stockOuts = await StockOut.find(query)
-      .populate('product', 'name category packSize sellingPrice')
+    const stockOuts = await StockOut.find()
+      .populate('product', 'name category sellingPrice')
       .sort({ date: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
-    const total = await StockOut.countDocuments(query);
+    const total = await StockOut.countDocuments();
 
     res.json({
       success: true,
@@ -155,7 +139,7 @@ const createStockOut = async (req, res) => {
     if (product.currentStock < quantity) {
       return res.status(400).json({
         success: false,
-        message: `Insufficient stock. Available: ${product.currentStock}, Requested: ${quantity}`
+        message: `Not enough stock. Available: ${product.currentStock}, Requested: ${quantity}`
       });
     }
 
@@ -167,7 +151,7 @@ const createStockOut = async (req, res) => {
     await product.save();
 
     const populatedStockOut = await StockOut.findById(stockOut._id)
-      .populate('product', 'name category packSize sellingPrice');
+      .populate('product', 'name category sellingPrice');
 
     res.status(201).json({
       success: true,
@@ -183,75 +167,9 @@ const createStockOut = async (req, res) => {
   }
 };
 
-// Batch Stock Out
-const createBatchStockOut = async (req, res) => {
-  try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: validationErrors.array()
-      });
-    }
-
-    const { sales, date } = req.body; // sales is array of {product, quantity, saleType, notes}
-    
-    const results = [];
-    const processingErrors = [];
-
-    for (let sale of sales) {
-      try {
-        const product = await Product.findById(sale.product);
-        if (!product) {
-          processingErrors.push(`Product not found: ${sale.product}`);
-          continue;
-        }
-
-        if (product.currentStock < sale.quantity) {
-          processingErrors.push(`Insufficient stock for ${product.name}. Available: ${product.currentStock}, Requested: ${sale.quantity}`);
-          continue;
-        }
-
-        const stockOut = await StockOut.create({
-          ...sale,
-          date: date || new Date()
-        });
-
-        product.currentStock -= sale.quantity;
-        await product.save();
-
-        results.push(stockOut);
-      } catch (error) {
-        processingErrors.push(`Error processing sale: ${error.message}`);
-      }
-    }
-
-    res.status(201).json({
-      success: true,
-      data: {
-        processed: results.length,
-        total: sales.length,
-        sales: results
-      },
-      errors: processingErrors.length > 0 ? processingErrors : undefined,
-      message: `${results.length} sales recorded successfully${processingErrors.length > 0 ? `, ${processingErrors.length} failed` : ''}`
-    });
-  } catch (error) {
-    console.error('Batch stock out error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-};
-
-
-
 module.exports = {
   getStockIns,
   createStockIn,
   getStockOuts,
-  createStockOut,
-  createBatchStockOut
+  createStockOut
 };
